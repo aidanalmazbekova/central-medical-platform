@@ -25,7 +25,7 @@ public class ReminderServiceImpl implements ReminderService {
                 + ". Дата: " + appointment.getSlot().getSchedule().getWorkDate()
                 + ". Время: " + appointment.getSlot().getStartTime();
 
-        kafkaTemplate.send(topicName, appointment.getId(), message);
+        kafkaTemplate.send(topicName, appointment.getId(), message).join();
     }
 
 }

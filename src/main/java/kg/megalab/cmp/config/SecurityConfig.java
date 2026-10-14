@@ -72,9 +72,12 @@ public class SecurityConfig {
                         ).hasAnyRole("DOCTOR", "ADMIN")
 
                         .requestMatchers(HttpMethod.PUT,
-                                "/api/v1/appointment/*/complete",
-                                "/api/v1/lab-appointment/*/complete"
+                                "/api/v1/appointment/*/complete"
                         ).hasAnyRole("DOCTOR", "ADMIN")
+
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/v1/lab-appointment/*/complete"
+                        ).hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.PUT,
                                 "/api/v1/appointment/*/cancel"

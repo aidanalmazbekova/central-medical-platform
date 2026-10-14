@@ -119,7 +119,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     private void createSlots(Schedule schedule) {
         LocalTime currentTime = schedule.getStartTime();
 
-        while (!currentTime.plusMinutes(schedule.getSlotDurationMinutes()).isAfter(schedule.getEndTime())) {
+        while (Duration.between(currentTime, schedule.getEndTime()).toMinutes()
+                >= schedule.getSlotDurationMinutes()) {
+
             Slot slot = new Slot();
             slot.setSchedule(schedule);
             slot.setStartTime(currentTime);
@@ -127,7 +129,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             slot.setStatus(SlotStatus.AVAILABLE);
 
             slotRepo.save(slot);
-            currentTime = currentTime.plusMinutes(schedule.getSlotDurationMinutes());
+            currentTime = slot.getEndTime();
         }
     }
 

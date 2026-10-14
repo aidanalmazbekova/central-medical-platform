@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -32,7 +33,12 @@ public class SlotServiceImpl implements SlotService {
             throw new ResourceNotFoundException("Врач не найден");
         }
 
-        return slotRepo.findByStatusAndScheduleDoctorId(SlotStatus.AVAILABLE, doctorId).stream().map(this::toDto).toList();
+        LocalDateTime now = LocalDateTime.now();
+
+        return slotRepo.findByStatusAndScheduleDoctorId(SlotStatus.AVAILABLE, doctorId).stream()
+                .filter(slot -> LocalDateTime.of(slot.getSchedule().getWorkDate(), slot.getStartTime()).isAfter(now))
+                .map(this::toDto)
+                .toList();
     }
 
     @Override

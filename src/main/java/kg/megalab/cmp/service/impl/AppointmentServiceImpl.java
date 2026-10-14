@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -55,6 +56,11 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new AlreadyExistsException("Слот уже занят");
         }
 
+        LocalDateTime slotDateTime = LocalDateTime.of(slot.getSchedule().getWorkDate(), slot.getStartTime());
+        if (!slotDateTime.isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Нельзя записаться на прошедшее время");
+        }
+
         Appointment appointment = new Appointment();
         appointment.setPatient(patient);
         appointment.setSlot(slot);
@@ -74,7 +80,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public AppointmentResponseDto cancelAppointment(Long appointmentId) {
-        Appointment appointment = appointmentRepo.findById(appointmentId)
+        Appointment appointment = appointmentRepo.findByIdForUpdate(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Запись не найдена"));
 
         JwtAuthenticationToken auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
@@ -111,7 +117,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public AppointmentResponseDto completeAppointment(Long appointmentId) {
-        Appointment appointment = appointmentRepo.findById(appointmentId)
+        Appointment appointment = appointmentRepo.findByIdForUpdate(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Запись не найдена"));
 
         JwtAuthenticationToken auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
